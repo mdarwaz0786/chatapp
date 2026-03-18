@@ -1,16 +1,28 @@
 import connectDatabase from "../database/connectDatabase.js";
+import http from "http";
+import { Server } from "socket.io";
+import logger from "../config/logger.js";
+import initSocket from "../sockets/socket.js";
 
 const startServer = async (app, port, mode) => {
-  try {
-    await connectDatabase();
+  await connectDatabase();
 
-    app.listen(port, () => {
-      console.log(`✅ Server is running in ${mode} mode at http://localhost:${port}`);
-    });
-  } catch (error) {
-    console.error("❌ DB connection failed", error);
-    process.exit(1);
-  }
+  const server = http.createServer(app);
+
+  const io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
+
+  app.set("io", io);
+
+  initSocket(io);
+
+  server.listen(port, () => {
+    logger.info(`Server running on port ${port} in ${mode} mode`);
+  });
 };
 
 export default startServer;

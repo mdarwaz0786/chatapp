@@ -1,17 +1,24 @@
+// Packages
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import compression from "compression";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 
+// Middlewares
 import errorHandler from "./src/middlewares/errorHandler.middleware.js";
 import { globalLimiter } from "./src/middlewares/rateLimit.middleware.js";
+import { morganMiddleware } from "./src/middlewares/morgon.middleware.js";
 
+// Config
 import corsOptions from "./src/config/cors.js";
 import startServer from "./src/config/startServer.js";
 
-import healthRoutes from "./src/routes/health.route.js";
-import { morganMiddleware } from "./src/middlewares/morgon.middleware.js";
+// Routes
+import healthRoute from "./src/routes/health.route.js";
+import messageRoute from "./src/routes/message.route.js";
+import conversationRoute from "./src/routes/conversation.route.js";
 
 // Load environment variables
 dotenv.config();
@@ -21,21 +28,28 @@ const mode = process.env.NODE_ENV || "development";
 // Init express app
 const app = express();
 
-// Security middlewares
+// Security
 app.use(helmet());
 app.use(cors(corsOptions));
+
+// Rate Limit
 app.use(globalLimiter);
 
 // Logger
 app.use(morganMiddleware);
 
-// Body parsers
+// Parsers
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(cookieParser());
+
+// Compress response
 app.use(compression());
 
 // API routes
-app.use("/api/v1", healthRoutes);
+app.use("/api/v1", healthRoute);
+app.use("/api/v1/message", messageRoute);
+app.use("/api/v1/conversation", conversationRoute);
 
 // 404 handler
 app.use((req, res) => {

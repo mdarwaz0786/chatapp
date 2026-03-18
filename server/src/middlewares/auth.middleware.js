@@ -1,23 +1,26 @@
 import jwt from "jsonwebtoken";
-import ApiError from "../helpers/apiError.js";
-import asyncHandler from "../helpers/asyncHandler.js";
 
-const protect = asyncHandler(async (req, res, next) => {
-  const authHeader = req.headers.authorization || req.headers.Authorization;
+export const protect = async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
 
-  if (!authHeader?.startsWith("Bearer ")) {
-    throw new ApiError(401, "Authentication token missing.");
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Access token is missing" });
   };
 
-  const token = authHeader.split(" ")[1];
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.user = decoded;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
+
+    const user = await UserModel.findById(decoded.id).select("-password -refreshToken -passwordResetToken -passwordResetExpires");
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: "User not found" });
+    };
+
+    req.user = user;
     next();
   } catch (err) {
-    return res.status(401).json({ message: "Invalid or expired token" });
-  }
-});
+    return res.status(401).json({ message: "Access token is invalid" });
+  };
+};
 
-export default protect;
+
