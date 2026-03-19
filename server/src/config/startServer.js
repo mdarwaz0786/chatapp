@@ -1,7 +1,6 @@
 import connectDatabase from "../database/connectDatabase.js";
 import http from "http";
 import { Server } from "socket.io";
-import logger from "../config/logger.js";
 import initSocket from "../sockets/socket.js";
 
 const startServer = async (app, port, mode) => {
@@ -21,7 +20,7 @@ const startServer = async (app, port, mode) => {
   initSocket(io);
 
   server.listen(port, () => {
-    logger.info(`Server running on port ${port} in ${mode} mode`);
+    console.log(`Server is running on port ${port} in ${mode} mode http://localhost:${port}`);
   });
 };
 

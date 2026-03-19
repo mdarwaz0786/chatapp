@@ -1,4 +1,4 @@
-// Packages
+// Modules
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -38,7 +38,7 @@ app.use(globalLimiter);
 // Logger
 app.use(morganMiddleware);
 
-// Parsers
+// Parser
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());

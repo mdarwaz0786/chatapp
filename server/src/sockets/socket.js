@@ -5,9 +5,9 @@ const onlineUsers = new Map(); // userId -> socketId
 
 export default (io) => {
   io.on("connection", (socket) => {
-    console.log("🔌 User connected:", socket.id);
+    console.log("User connected:", socket.id);
 
-    // ✅ 1. Register user
+    // Register user
     socket.on("join", async (userId) => {
       onlineUsers.set(userId, socket.id);
 
@@ -16,7 +16,7 @@ export default (io) => {
         socketId: socket.id,
       });
 
-      console.log(`✅ User ${userId} is online`);
+      console.log(`User ${userId} is online`);
 
       // Broadcast online status
       socket.broadcast.emit("userOnline", userId);
